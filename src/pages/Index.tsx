@@ -4,6 +4,7 @@ import { Logo } from '@/components/Logo';
 import { WalletButton } from '@/components/WalletButton';
 import { ActivityCard } from '@/components/ActivityCard';
 import { ProgressBar } from '@/components/ProgressBar';
+import { AddActivityDialog } from '@/components/AddActivityDialog';
 import { Moon, Dumbbell, CheckSquare, Shield } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -86,6 +87,25 @@ const Index = () => {
     }
   };
 
+  const handleAddActivity = (category: 'sleep' | 'exercise' | 'tasks', label: string) => {
+    if (!isConnected) {
+      toast.error('Please connect your wallet first');
+      return;
+    }
+
+    const newActivities = { ...activities };
+    const newId = `${category}-${Date.now()}`;
+    newActivities[category].push({
+      id: newId,
+      label,
+      completed: false,
+      encrypted: true,
+    });
+    
+    saveActivities(newActivities);
+    toast.success('Activity created successfully!');
+  };
+
   const totalActivities = activities.sleep.length + activities.exercise.length + activities.tasks.length;
   const completedActivities = [
     ...activities.sleep,
@@ -123,6 +143,11 @@ const Index = () => {
 
         {isConnected ? (
           <div className="space-y-8 max-w-4xl mx-auto">
+            {/* Add Activity Button */}
+            <div className="flex justify-end mb-4">
+              <AddActivityDialog onAddActivity={handleAddActivity} />
+            </div>
+
             {/* Activities Grid */}
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               <ActivityCard

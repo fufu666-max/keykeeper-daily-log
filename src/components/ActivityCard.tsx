@@ -1,7 +1,5 @@
-import { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Lock } from 'lucide-react';
 
@@ -17,9 +15,10 @@ interface ActivityCardProps {
   icon: React.ReactNode;
   activities: Activity[];
   onActivityToggle: (id: string) => void;
+  addActivityButton?: React.ReactNode;
 }
 
-export const ActivityCard = ({ title, icon, activities, onActivityToggle }: ActivityCardProps) => {
+export const ActivityCard = ({ title, icon, activities, onActivityToggle, addActivityButton }: ActivityCardProps) => {
   return (
     <Card className="p-6 shadow-medium hover:shadow-glow transition-smooth border-primary/10">
       <div className="flex items-center gap-3 mb-4">
@@ -52,6 +51,12 @@ export const ActivityCard = ({ title, icon, activities, onActivityToggle }: Acti
           </div>
         ))}
       </div>
+      
+      {addActivityButton && (
+        <div className="mt-4 pt-4 border-t border-border/50">
+          {addActivityButton}
+        </div>
+      )}
     </Card>
   );
 };
