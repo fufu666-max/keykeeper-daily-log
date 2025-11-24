@@ -223,7 +223,7 @@ export function useTodoList(contractAddress: string | undefined): UseTodoListSta
   );
 
   const toggleTodo = useCallback(
-    async (index: number) => {
+    async (contractIndex: number) => {
       if (!contractAddress || !ethersSigner || !fhevmInstance || !address) {
         setMessage("Missing requirements for toggling todo");
         return;
@@ -233,9 +233,10 @@ export function useTodoList(contractAddress: string | undefined): UseTodoListSta
         setIsLoading(true);
         setMessage("Toggling todo...");
 
-        const todo = todos[index];
+        // Find todo by contract index (not array index, as todos may be sorted)
+        const todo = todos.find(t => t.index === contractIndex);
         if (!todo) {
-          throw new Error("Todo not found");
+          throw new Error(`Todo not found at contract index ${contractIndex}`);
         }
 
         // Encrypt new completion status (toggle: 1 if was 0, 0 if was 1)
@@ -250,7 +251,7 @@ export function useTodoList(contractAddress: string | undefined): UseTodoListSta
         const contract = new ethers.Contract(contractAddress, PrivateTodoListABI, ethersSigner);
 
         const tx = await contract.toggleTodo(
-          index,
+          contractIndex,
           encryptedCompleted.handles[0],
           encryptedCompleted.inputProof,
           {
