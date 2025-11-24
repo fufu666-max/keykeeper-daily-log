@@ -37,30 +37,43 @@ cd ui
 npm install
 ```
 
-### 2. Configure Environment Variables
-
-Create a `.env.local` file in the `ui` directory:
-
-```env
-VITE_CONTRACT_ADDRESS=your_contract_address_here
-VITE_WALLETCONNECT_PROJECT_ID=your_walletconnect_project_id
-```
-
-### 3. Deploy Contracts
+### 2. Deploy Contracts
 
 #### Local Network
 
-1. Start Hardhat node:
+1. Start Hardhat node (in a separate terminal):
 ```bash
 npx hardhat node
 ```
 
-2. Deploy contracts:
+2. Deploy contracts (in another terminal):
 ```bash
 npx hardhat deploy --network localhost
 ```
 
-3. Copy the deployed contract address to your `.env.local` file.
+This will deploy the `PrivateTodoList` contract and display the contract address. The default address for localhost is usually:
+```
+PrivateTodoList contract: 0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512
+```
+
+### 3. Configure Environment Variables
+
+Create a `.env.local` file in the `ui` directory:
+
+**Option 1: Copy from example**
+```bash
+cd ui
+cp .env.example .env.local
+```
+
+**Option 2: Create manually**
+Create `ui/.env.local` with:
+```env
+VITE_CONTRACT_ADDRESS=0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512
+VITE_WALLETCONNECT_PROJECT_ID=YOUR_PROJECT_ID
+```
+
+**Note**: Replace the contract address with the actual address from step 2 if it's different. The WalletConnect Project ID is optional for local development.
 
 #### Sepolia Testnet
 
