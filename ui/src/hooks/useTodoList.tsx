@@ -499,21 +499,25 @@ export function useTodoList(contractAddress: string | undefined): UseTodoListSta
       }
 
       // Load todos without decrypting (show encrypted state)
-      // Text will be loaded from local storage if available
+      // Text and completed status will be loaded from local storage if available
+      const completedMap = getCompletedMap();
       for (const todo of todoData) {
         // Get text from mapping (if available)
         const textFromMap = textMap[todo.idHandle];
         const text = textFromMap || `Encrypted Todo #${todo.index + 1}`;
+
+        // Get completed status from mapping (if available, from previous decryption)
+        const completedFromMap = completedMap[todo.idHandle] || false;
 
         loadedTodos.push({
           id: `todo-${todo.index}`,
           text,
           encryptedId: todo.idHandle,
           encryptedCompleted: todo.completedHandle,
-          completed: false, // Will be decrypted later
+          completed: completedFromMap, // Use saved completed status if available
           timestamp: todo.timestamp,
           index: todo.index,
-          isDecrypted: false, // Not decrypted yet, will be set to true after decryptTodos
+          isDecrypted: !!textFromMap, // Mark as decrypted if text is available
         });
       }
 
