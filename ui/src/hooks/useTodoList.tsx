@@ -533,27 +533,36 @@ export function useTodoList(contractAddress: string | undefined): UseTodoListSta
 
       // Update todos with decrypted values
       const textMap = getTextMap();
+      console.log("[useTodoList] Decryption result keys:", Object.keys(decryptedResult));
+      console.log("[useTodoList] Text map keys:", Object.keys(textMap));
+      
       const updatedTodos = todos.map(todo => {
-        const id = todo.encryptedId && todo.encryptedId.length > 0
-          ? Number(decryptedResult[todo.encryptedId] || 0)
-          : 0;
-        const completed = todo.encryptedCompleted && todo.encryptedCompleted.length > 0
-          ? Number(decryptedResult[todo.encryptedCompleted] || 0) === 1
-          : false;
+        // Ensure handles are in the same format (lowercase)
+        const idHandle = todo.encryptedId?.toLowerCase() || '';
+        const completedHandle = todo.encryptedCompleted?.toLowerCase() || '';
+        
+        // Try different handle formats to find the decrypted value
+        const idValue = decryptedResult[idHandle] || decryptedResult[todo.encryptedId] || 0;
+        const completedValue = decryptedResult[completedHandle] || decryptedResult[todo.encryptedCompleted] || 0;
+        
+        const id = Number(idValue || 0);
+        const completed = Number(completedValue || 0) === 1;
 
         // Get text from mapping (should exist from when todo was created)
-        // If not found, keep the current text but it should be from local storage
-        const textFromMap = textMap[todo.encryptedId];
+        const textFromMap = textMap[idHandle] || textMap[todo.encryptedId];
         const text = textFromMap || (todo.text.startsWith('Encrypted Todo') ? `Todo #${todo.index + 1}` : todo.text);
 
         console.log("[useTodoList] Decrypting todo:", {
           index: todo.index,
           encryptedId: todo.encryptedId,
+          idHandle,
           textFromMap,
           currentText: todo.text,
           finalText: text,
           completed,
           id,
+          idValue,
+          completedValue,
         });
 
         return {
