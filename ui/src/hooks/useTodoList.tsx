@@ -578,8 +578,23 @@ export function useTodoList(contractAddress: string | undefined): UseTodoListSta
         const completed = Number(completedValue || 0) === 1;
 
         // Get text from mapping (should exist from when todo was created)
-        const textFromMap = textMap[idHandle] || textMap[todo.encryptedId];
+        // Try multiple handle formats to find the text
+        const textFromMap = textMap[idHandle] 
+          || textMap[todo.encryptedId] 
+          || textMap[todo.encryptedId.toLowerCase()]
+          || textMap[todo.encryptedId.toUpperCase()];
+        
+        // If text not found in map, we need to use the decrypted ID to look it up
+        // But since we don't have a reverse mapping, we'll show a generic text
         const text = textFromMap || (todo.text.startsWith('Encrypted Todo') ? `Todo #${todo.index + 1}` : todo.text);
+        
+        console.log("[useTodoList] Looking for text:", {
+          idHandle,
+          encryptedId: todo.encryptedId,
+          textMapKeys: Object.keys(textMap),
+          textFromMap,
+          finalText: text,
+        });
 
         console.log("[useTodoList] Decrypting todo:", {
           index: todo.index,
