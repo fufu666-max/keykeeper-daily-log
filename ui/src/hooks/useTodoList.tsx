@@ -155,6 +155,11 @@ export function useTodoList(contractAddress: string | undefined): UseTodoListSta
         );
         encryptedIdInput.add32(todoIdUint32);
         const encryptedId = await encryptedIdInput.encrypt();
+        
+        // Validate encrypted result
+        if (!encryptedId || !encryptedId.handles || !Array.isArray(encryptedId.handles) || encryptedId.handles.length === 0) {
+          throw new Error("Encryption failed: Invalid handle returned");
+        }
 
         // Encrypt completion status (0 = not completed)
         const encryptedCompletedInput = fhevmInstance.createEncryptedInput(
