@@ -1,110 +1,176 @@
-# FHEVM Hardhat Template
+# Keykeeper - Private Encrypted To-do List
 
-A Hardhat-based template for developing Fully Homomorphic Encryption (FHE) enabled Solidity smart contracts using the
-FHEVM protocol by Zama.
+A privacy-first encrypted to-do list application built with FHEVM (Fully Homomorphic Encryption Virtual Machine) and React. Your todos are encrypted on-chain and only you can decrypt them.
 
-## Quick Start
+## Features
 
-For detailed instructions see:
-[FHEVM Hardhat Quick Start Tutorial](https://docs.zama.ai/protocol/solidity-guides/getting-started/quick-start-tutorial)
+- 🔒 **End-to-End Encryption**: All todo items are encrypted using FHE before being stored on-chain
+- 🔐 **Private by Design**: Only you can decrypt your todos using your wallet
+- 📝 **Simple Interface**: Clean, modern UI for managing your encrypted todos
+- 🌐 **Blockchain Storage**: Todos are stored on-chain with encrypted data
+- 🎨 **Rainbow Wallet Integration**: Seamless wallet connection with RainbowKit
 
-### Prerequisites
+## Tech Stack
 
-- **Node.js**: Version 20 or higher
-- **npm or yarn/pnpm**: Package manager
+- **Frontend**: React + TypeScript + Vite
+- **UI**: shadcn/ui + Tailwind CSS
+- **Blockchain**: Hardhat + Ethers.js
+- **Encryption**: FHEVM (Zama)
+- **Wallet**: RainbowKit + Wagmi
 
-### Installation
+## Prerequisites
 
-1. **Install dependencies**
+- Node.js >= 20
+- npm >= 7.0.0
+- Hardhat node running on localhost:8545 (for local development)
 
-   ```bash
-   npm install
-   ```
+## Setup
 
-2. **Set up environment variables**
+### 1. Install Dependencies
 
-   ```bash
-   npx hardhat vars set MNEMONIC
+```bash
+# Install contract dependencies
+npm install
 
-   # Set your Infura API key for network access
-   npx hardhat vars set INFURA_API_KEY
-
-   # Optional: Set Etherscan API key for contract verification
-   npx hardhat vars set ETHERSCAN_API_KEY
-   ```
-
-3. **Compile and test**
-
-   ```bash
-   npm run compile
-   npm run test
-   ```
-
-4. **Deploy to local network**
-
-   ```bash
-   # Start a local FHEVM-ready node
-   npx hardhat node
-   # Deploy to local network
-   npx hardhat deploy --network localhost
-   ```
-
-5. **Deploy to Sepolia Testnet**
-
-   ```bash
-   # Deploy to Sepolia
-   npx hardhat deploy --network sepolia
-   # Verify contract on Etherscan
-   npx hardhat verify --network sepolia <CONTRACT_ADDRESS>
-   ```
-
-6. **Test on Sepolia Testnet**
-
-   ```bash
-   # Once deployed, you can run a simple test on Sepolia.
-   npx hardhat test --network sepolia
-   ```
-
-## 📁 Project Structure
-
-```
-fhevm-hardhat-template/
-├── contracts/           # Smart contract source files
-│   └── FHECounter.sol   # Example FHE counter contract
-├── deploy/              # Deployment scripts
-├── tasks/               # Hardhat custom tasks
-├── test/                # Test files
-├── hardhat.config.ts    # Hardhat configuration
-└── package.json         # Dependencies and scripts
+# Install UI dependencies
+cd ui
+npm install
 ```
 
-## 📜 Available Scripts
+### 2. Configure Environment Variables
 
-| Script             | Description              |
-| ------------------ | ------------------------ |
-| `npm run compile`  | Compile all contracts    |
-| `npm run test`     | Run all tests            |
-| `npm run coverage` | Generate coverage report |
-| `npm run lint`     | Run linting checks       |
-| `npm run clean`    | Clean build artifacts    |
+Create a `.env.local` file in the `ui` directory:
 
-## 📚 Documentation
+```env
+VITE_CONTRACT_ADDRESS=your_contract_address_here
+VITE_WALLETCONNECT_PROJECT_ID=your_walletconnect_project_id
+```
 
-- [FHEVM Documentation](https://docs.zama.ai/fhevm)
-- [FHEVM Hardhat Setup Guide](https://docs.zama.ai/protocol/solidity-guides/getting-started/setup)
-- [FHEVM Testing Guide](https://docs.zama.ai/protocol/solidity-guides/development-guide/hardhat/write_test)
-- [FHEVM Hardhat Plugin](https://docs.zama.ai/protocol/solidity-guides/development-guide/hardhat)
+### 3. Deploy Contracts
 
-## 📄 License
+#### Local Network
 
-This project is licensed under the BSD-3-Clause-Clear License. See the [LICENSE](LICENSE) file for details.
+1. Start Hardhat node:
+```bash
+npx hardhat node
+```
 
-## 🆘 Support
+2. Deploy contracts:
+```bash
+npx hardhat deploy --network localhost
+```
 
-- **GitHub Issues**: [Report bugs or request features](https://github.com/zama-ai/fhevm/issues)
-- **Documentation**: [FHEVM Docs](https://docs.zama.ai)
-- **Community**: [Zama Discord](https://discord.gg/zama)
+3. Copy the deployed contract address to your `.env.local` file.
 
----
+#### Sepolia Testnet
 
-**Built with ❤️ by the Zama team**
+1. Configure your `.env` file with:
+   - `MNEMONIC`: Your wallet mnemonic
+   - `INFURA_API_KEY`: Your Infura API key
+   - `ETHERSCAN_API_KEY`: Your Etherscan API key (optional)
+
+2. Deploy:
+```bash
+npx hardhat deploy --network sepolia
+```
+
+### 4. Run Tests
+
+#### Local Tests
+```bash
+npx hardhat test
+```
+
+#### Sepolia Tests
+```bash
+npx hardhat test --network sepolia test/PrivateTodoListSepolia.ts
+```
+
+### 5. Start Development Server
+
+```bash
+cd ui
+npm run dev
+```
+
+## Contract Overview
+
+### PrivateTodoList.sol
+
+The main contract that stores encrypted todos on-chain.
+
+**Key Functions:**
+- `createTodo()`: Create a new encrypted todo item
+- `toggleTodo()`: Toggle the completion status of a todo
+- `getTodo()`: Retrieve an encrypted todo by index
+- `getTodoCount()`: Get the total number of todos for a user
+
+**Data Structure:**
+- `id` (euint32): Encrypted hash of the todo text
+- `completed` (euint32): Encrypted completion status (0 = incomplete, 1 = complete)
+- `timestamp` (uint256): Plaintext timestamp for sorting
+
+## How It Works
+
+1. **Creating a Todo**:
+   - User enters todo text (e.g., "Buy medicine")
+   - Text is hashed to a uint32 value
+   - Both the hash and completion status (0) are encrypted using FHEVM
+   - Encrypted data is sent to the contract
+   - Plaintext text is stored locally in browser storage (mapped to the encrypted hash)
+
+2. **Viewing Todos**:
+   - Encrypted todos are fetched from the contract
+   - Each todo is decrypted using FHEVM
+   - Plaintext text is retrieved from local storage using the decrypted hash
+   - Todos are displayed to the user
+
+3. **Toggling Completion**:
+   - New completion status (0 or 1) is encrypted
+   - Encrypted value is sent to the contract
+   - Contract updates the todo's completion status
+
+## Project Structure
+
+```
+keykeeper-daily-log/
+├── contracts/
+│   └── PrivateTodoList.sol      # Main contract
+├── test/
+│   ├── PrivateTodoList.ts       # Local tests
+│   └── PrivateTodoListSepolia.ts # Sepolia tests
+├── tasks/
+│   └── PrivateTodoList.ts       # Hardhat tasks
+├── ui/
+│   ├── src/
+│   │   ├── components/          # React components
+│   │   ├── hooks/
+│   │   │   └── useTodoList.tsx  # Main hook for todo operations
+│   │   ├── fhevm/               # FHEVM utilities
+│   │   └── pages/
+│   │       └── Index.tsx        # Main page
+│   └── public/
+│       └── favicon.svg          # App icon
+└── README.md
+```
+
+## Development
+
+### Compile Contracts
+```bash
+npx hardhat compile
+```
+
+### Run Tests
+```bash
+npx hardhat test
+```
+
+### Type Generation
+```bash
+npx hardhat typechain
+```
+
+## License
+
+MIT

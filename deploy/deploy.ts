@@ -11,7 +11,14 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   });
 
   console.log(`FHECounter contract: `, deployedFHECounter.address);
+
+  const deployedPrivateTodoList = await deploy("PrivateTodoList", {
+    from: deployer,
+    log: true,
+  });
+
+  console.log(`PrivateTodoList contract: `, deployedPrivateTodoList.address);
 };
 export default func;
-func.id = "deploy_fheCounter"; // id required to prevent reexecution
-func.tags = ["FHECounter"];
+func.id = "deploy_contracts"; // id required to prevent reexecution
+func.tags = ["FHECounter", "PrivateTodoList"];
