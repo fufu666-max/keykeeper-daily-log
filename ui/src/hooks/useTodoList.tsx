@@ -40,6 +40,8 @@ interface UseTodoListState {
 
 // Local storage key for text mapping
 const TEXT_MAP_KEY = "todo_text_map";
+// Local storage key for completed status mapping (decrypted)
+const COMPLETED_MAP_KEY = "todo_completed_map";
 
 export function useTodoList(contractAddress: string | undefined): UseTodoListState {
   const { address, isConnected } = useAccount();
@@ -129,6 +131,19 @@ export function useTodoList(contractAddress: string | undefined): UseTodoListSta
   const saveTextMap = useCallback((map: Record<string, string>) => {
     if (typeof window === "undefined" || !address) return;
     localStorage.setItem(`${TEXT_MAP_KEY}_${address}`, JSON.stringify(map));
+  }, [address]);
+
+  // Get completed status mapping from local storage
+  const getCompletedMap = useCallback((): Record<string, boolean> => {
+    if (typeof window === "undefined" || !address) return {};
+    const stored = localStorage.getItem(`${COMPLETED_MAP_KEY}_${address}`);
+    return stored ? JSON.parse(stored) : {};
+  }, [address]);
+
+  // Save completed status mapping to local storage
+  const saveCompletedMap = useCallback((map: Record<string, boolean>) => {
+    if (typeof window === "undefined" || !address) return;
+    localStorage.setItem(`${COMPLETED_MAP_KEY}_${address}`, JSON.stringify(map));
   }, [address]);
 
   // Hash text to uint32
@@ -655,6 +670,11 @@ export function useTodoList(contractAddress: string | undefined): UseTodoListSta
           completedValue,
         });
 
+        // Save completed status to mapping
+        if (todo.encryptedId) {
+          completedMap[todo.encryptedId.toLowerCase()] = completed;
+        }
+
         return {
           ...todo,
           text,
@@ -662,6 +682,9 @@ export function useTodoList(contractAddress: string | undefined): UseTodoListSta
           isDecrypted: true, // Mark as decrypted
         };
       });
+
+      // Save completed status mapping
+      saveCompletedMap(completedMap);
 
       console.log("[useTodoList] Updated todos after decryption:", updatedTodos);
       setTodos(updatedTodos);
