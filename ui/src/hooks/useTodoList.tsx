@@ -422,94 +422,23 @@ export function useTodoList(contractAddress: string | undefined): UseTodoListSta
         }
       }
 
-      // Batch decrypt all handles with a single signature
-      if (todoData.length > 0) {
-        // Generate keypair once
-        const keypair = (fhevmInstance as any).generateKeypair?.() || {
-          publicKey: new Uint8Array(32).fill(0),
-          privateKey: new Uint8Array(32).fill(0),
-        };
+      // Load todos without decrypting (show encrypted state)
+      // Text will be loaded from local storage if available
+      for (const todo of todoData) {
+        // Get text from mapping (if available)
+        const textFromMap = textMap[todo.idHandle];
+        const text = textFromMap || `Encrypted Todo #${todo.index + 1}`;
 
-        // Create EIP712 signature once
-        const contractAddresses = [contractAddress as `0x${string}`];
-        const startTimestamp = Math.floor(Date.now() / 1000).toString();
-        const durationDays = "10";
-
-        const eip712 = (fhevmInstance as any).createEIP712?.(
-          keypair.publicKey,
-          contractAddresses,
-          startTimestamp,
-          durationDays
-        ) || {
-          domain: { name: "FHEVM", version: "1", chainId, verifyingContract: contractAddresses[0] },
-          types: { UserDecryptRequestVerification: [] },
-          message: {},
-        };
-
-        // Sign once for all decryptions
-        const signature = await ethersSigner.signTypedData(
-          eip712.domain,
-          { UserDecryptRequestVerification: eip712.types.UserDecryptRequestVerification },
-          eip712.message
-        );
-
-        const signatureForDecrypt = chainId === 31337 ? signature.replace("0x", "") : signature;
-
-        // Collect all handles for batch decryption
-        const handleContractPairs: Array<{ handle: string; contractAddress: `0x${string}` }> = [];
-        for (const todo of todoData) {
-          if (todo.idHandle && todo.idHandle.length > 0) {
-            handleContractPairs.push({
-              handle: todo.idHandle,
-              contractAddress: contractAddress as `0x${string}`,
-            });
-          }
-          if (todo.completedHandle && todo.completedHandle.length > 0) {
-            handleContractPairs.push({
-              handle: todo.completedHandle,
-              contractAddress: contractAddress as `0x${string}`,
-            });
-          }
-        }
-
-        // Batch decrypt all handles at once
-        const decryptedResult = await (fhevmInstance as any).userDecrypt(
-          handleContractPairs,
-          keypair.privateKey,
-          keypair.publicKey,
-          signatureForDecrypt,
-          contractAddresses,
-          address as `0x${string}`,
-          startTimestamp,
-          durationDays
-        );
-
-        // Process decrypted results
-        for (const todo of todoData) {
-          try {
-            const id = todo.idHandle && todo.idHandle.length > 0
-              ? Number(decryptedResult[todo.idHandle] || 0)
-              : 0;
-            const completed = todo.completedHandle && todo.completedHandle.length > 0
-              ? Number(decryptedResult[todo.completedHandle] || 0) === 1
-              : false;
-
-            // Get text from mapping
-            const text = textMap[todo.idHandle] || `Todo #${todo.index + 1}`;
-
-            loadedTodos.push({
-              id: `todo-${todo.index}`,
-              text,
-              encryptedId: todo.idHandle,
-              encryptedCompleted: todo.completedHandle,
-              completed,
-              timestamp: todo.timestamp,
-              index: todo.index,
-            });
-          } catch (error) {
-            console.error(`Error processing todo ${todo.index}:`, error);
-          }
-        }
+        loadedTodos.push({
+          id: `todo-${todo.index}`,
+          text,
+          encryptedId: todo.idHandle,
+          encryptedCompleted: todo.completedHandle,
+          completed: false, // Will be decrypted later
+          timestamp: todo.timestamp,
+          index: todo.index,
+          isDecrypted: false, // Not decrypted yet, will be set to true after decryptTodos
+        });
       }
 
       // Sort by timestamp (newest first)
