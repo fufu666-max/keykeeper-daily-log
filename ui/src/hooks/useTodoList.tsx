@@ -421,11 +421,18 @@ export function useTodoList(contractAddress: string | undefined): UseTodoListSta
         setMessage("Todo toggled successfully!");
 
         // Update the todo in local state immediately (optimistic update)
+        const newCompletedStatus = !todos.find(t => t.index === contractIndex)?.completed;
+        const completedMap = getCompletedMap();
         setTodos(prevTodos => prevTodos.map(todo => {
           if (todo.index === contractIndex) {
+            // Also save to completed map
+            if (todo.encryptedId) {
+              completedMap[todo.encryptedId.toLowerCase()] = newCompletedStatus;
+              saveCompletedMap(completedMap);
+            }
             return {
               ...todo,
-              completed: !todo.completed, // Toggle the completed status
+              completed: newCompletedStatus, // Toggle the completed status
             };
           }
           return todo;
