@@ -53,12 +53,20 @@ const Index = () => {
     }
   };
 
+  // Check if todos are decrypted (if any todo has completed status that's not false, it's decrypted)
+  // Or if text doesn't start with "Encrypted Todo"
+  const isDecrypted = todos.length > 0 && todos.some(t => {
+    // If text is from local storage mapping, it's decrypted
+    // If text starts with "Encrypted Todo", it's not decrypted
+    return t.text && !t.text.startsWith('Encrypted Todo');
+  });
+
   // Convert todos to Activity format for ActivityCard
   const todosAsActivities = todos.map(todo => ({
     id: todo.id,
     label: todo.text,
     completed: todo.completed,
-    encrypted: true,
+    encrypted: !isDecrypted,
   }));
 
   const totalTodos = todos.length;
@@ -131,6 +139,40 @@ const Index = () => {
             {/* Todos List */}
             {!isLoading && (
               <>
+                {/* Decrypt Button */}
+                {!isDecrypted && todos.length > 0 && (
+                  <div className="mb-4 flex justify-center">
+                    <button
+                      onClick={async () => {
+                        if (!isConnected) {
+                          toast.error('Please connect your wallet first');
+                          return;
+                        }
+                        try {
+                          await decryptTodos();
+                          toast.success('Todos decrypted successfully!');
+                        } catch (error: any) {
+                          toast.error(`Error: ${error.message || 'Failed to decrypt todos'}`);
+                        }
+                      }}
+                      disabled={isDecrypting || !isConnected}
+                      className="px-6 py-3 bg-gradient-primary text-primary-foreground rounded-lg font-medium hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                    >
+                      {isDecrypting ? (
+                        <>
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                          Decrypting...
+                        </>
+                      ) : (
+                        <>
+                          <Shield className="w-4 h-4" />
+                          Decrypt with Wallet
+                        </>
+                      )}
+                    </button>
+                  </div>
+                )}
+
                 <ActivityCard
                   title="My Todos"
                   icon={<CheckSquare className="w-5 h-5" />}
