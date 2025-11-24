@@ -606,8 +606,10 @@ export function useTodoList(contractAddress: string | undefined): UseTodoListSta
 
       // Update todos with decrypted values
       const textMap = getTextMap();
+      const completedMap = getCompletedMap();
       console.log("[useTodoList] Text map:", textMap);
       console.log("[useTodoList] Text map keys:", Object.keys(textMap));
+      console.log("[useTodoList] Completed map:", completedMap);
       
       const updatedTodos = todos.map(todo => {
         // Ensure handles are in the same format (lowercase)
