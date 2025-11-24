@@ -194,17 +194,8 @@ export function useTodoList(contractAddress: string | undefined): UseTodoListSta
         // Save text mapping
         const textMap = getTextMap();
         // Ensure handle is a string and convert to lowercase
-        const handleValue = encryptedId.handles[0];
-        let handle: string = '';
-        if (typeof handleValue === 'string') {
-          handle = handleValue.toLowerCase();
-        } else if (handleValue != null) {
-          if (typeof handleValue === 'object' && 'toString' in handleValue) {
-            handle = String(handleValue).toLowerCase();
-          } else {
-            handle = String(handleValue).toLowerCase();
-          }
-        }
+        const handleValue: unknown = encryptedId.handles[0];
+        const handle = String(handleValue || '').toLowerCase();
         
         if (handle && handle.length > 0) {
           textMap[handle] = text;
