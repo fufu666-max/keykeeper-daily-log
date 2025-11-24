@@ -171,6 +171,47 @@ npx hardhat test
 npx hardhat typechain
 ```
 
+## Git and GitHub
+
+### Initial Setup
+
+The repository is already configured with:
+- Remote: `https://github.com/UlaMacAdam/keykeeper-daily-log.git`
+- User: `UlaMacAdam`
+- Email: `xpmrgq3126972@outlook.com`
+
+### Pushing Changes to GitHub
+
+#### Option 1: Using PowerShell Script (Windows)
+
+```powershell
+.\push-to-github.ps1 "Your commit message"
+```
+
+#### Option 2: Using Bash Script (Linux/Mac)
+
+```bash
+chmod +x push-to-github.sh
+./push-to-github.sh "Your commit message"
+```
+
+#### Option 3: Manual Git Commands
+
+```bash
+git add .
+git commit -m "Your commit message"
+git push origin main
+```
+
+### Automatic Push
+
+The repository includes a GitHub Actions workflow (`.github/workflows/auto-push.yml`) that will automatically build the project when changes are pushed to the main branch.
+
+**Important Security Note**: The GitHub token in the remote URL is exposed. For security, you should:
+1. Revoke the current token: https://github.com/settings/tokens
+2. Generate a new token with appropriate permissions
+3. Update the remote URL: `git remote set-url origin https://YOUR_NEW_TOKEN@github.com/UlaMacAdam/keykeeper-daily-log.git`
+
 ## License
 
 MIT
